@@ -168,23 +168,75 @@ parameters = html.Div([
 
 results = html.Div([
     html.Div([
-        dcc.Input(
-            id='call-price-bs',
-            type='number',
-            value=None,
-            disabled=True,
+        html.Div(
+            [
+                html.Label(
+                    'Call Value',
+                    style={
+                        'fontSize': '15px',
+                        'fontWeight': 'normal',
+                        'marginBottom': '5px'
+                    }
+                ),
+                html.Div(
+                    id='call-price-bs',
+                    style={
+                        'fontSize': '18px',
+                        'fontWeight': 'bold',
+                    })
+            ],
+            style={
+                'border': '3px solid #4CAF50',  # Softer green border
+                'borderRadius': '15px',  # Rounded corners
+                'padding': '10px',  # Inner padding
+                'backgroundColor': '#4CAF50',  # Light green background
+                'color': 'black',  # Black text for better readability
+                'width': '200px',  # Adjust width
+                'textAlign': 'center',  # Center the text
+                'display': 'flex',
+                'flexDirection': 'column',
+                'alignItems': 'center',  # Center items vertically
+                'boxShadow': '2px 2px 10px rgba(0, 128, 0, 0.3)',  # Softer green shadow
+            }
         ),
-        dcc.Input(
-            id='put-price-bs',
-            type='number',
-            value=None,
-            disabled=True,
-        )
+
+        html.Div(
+            [
+                html.Label(
+                    'Put Value',
+                    style={
+                        'fontSize': '15px',
+                        'fontWeight': 'normal',
+                        'marginBottom': '5px'
+                    }
+                ),
+                html.Div(id='put-price-bs',
+                         style={
+                             'fontSize': '18px',
+                             'fontWeight': 'bold',
+                         }
+                )
+            ],
+            style={
+                'border': '3px solid #FF6347',  # Softer red border
+                'borderRadius': '15px',  # Rounded corners
+                'padding': '10px',  # Inner padding
+                'backgroundColor': '#FF6347',  # Light red background
+                'color': 'black',  # Black text for contrast
+                'width': '200px',  # Adjust width
+                'textAlign': 'center',  # Center the text
+                'display': 'flex',
+                'flexDirection': 'column',
+                'alignItems': 'center',  # Center items vertically
+                'boxShadow': '2px 2px 10px rgba(255, 99, 71, 0.5)',  # Softer red shadow
+            }
+        ),
     ], style={
         'display': 'flex',
         'justifyContent': 'center',
-        'gap': '50px',
+        'gap': '20%',
         'width': '100%',
+        'height': '10%',
         'padding': '10px',
         'boxSizing': 'border-box'
     }),
@@ -194,14 +246,14 @@ results = html.Div([
             id='call-heatmap',
             figure={},
             style={
-                'width': '50vw'
+                'width': '50%'
             }
         ),
         dcc.Graph(
             id='put-heatmap',
             figure={},
             style={
-                'width': '50vw'
+                'width': '50%'
             }
         )
     ], style={
@@ -213,11 +265,10 @@ results = html.Div([
     })
 ], style={
     'display': 'flex',
-    'justifyContent': 'center',
+    'flexDirection': 'column',
     'alignItems': 'flex-start',
-    'width': '100vw',
-    'height': '100vw',
-
+    'width': '100%',
+    'height': '100%',
 }
 )
 
@@ -234,8 +285,8 @@ layout = html.Div([
 
 
 @callback(
-    Output('call-price-bs', 'value'),
-    Output('put-price-bs', 'value'),
+    Output('call-price-bs', 'children'),
+    Output('put-price-bs', 'children'),
     [
         Input('spot-price-bs', 'value'),
         Input('strike-bs', 'value'),
@@ -245,10 +296,12 @@ layout = html.Div([
     ]
 )
 def compute_option_price_with_bs(spot, strike, maturity, sigma, rf):
+    if not spot or not strike or not maturity or not sigma or not rf:
+        raise PreventUpdate
 
     d1 = (np.log(spot / strike) + (rf + 0.5 * sigma ** 2) * maturity) / (sigma * np.sqrt(maturity))
     d2 = d1 - sigma * np.sqrt(maturity)
     call_price = spot * norm.cdf(d1) - strike * norm.cdf(d2)
     put_price = strike * np.exp(-rf * maturity) * norm.cdf(-d2) - spot * norm.cdf(-d1)
 
-    return call_price, put_price
+    return '$ ' + str(call_price.round(3)), '$ ' + str(put_price.round(3))
