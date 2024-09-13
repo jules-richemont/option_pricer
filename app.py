@@ -43,10 +43,11 @@ header = html.Div([
 # Page layout
 app.layout = html.Div([
     header,
-    html.Br(),
     html.Div(
         dash.page_container,
-        style={'paddingTop': '80px'}  # Adds space for the fixed header
+        style={
+            'marginTop': '7vh',
+        }
     )
 ])
 

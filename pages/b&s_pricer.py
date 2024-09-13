@@ -94,7 +94,6 @@ parameters = html.Div([
         'padding': '10px'
     }),
 
-    html.Br(),
 
     html.Div([
         html.Label('min Spot Price:'),
@@ -161,7 +160,8 @@ parameters = html.Div([
     ], style={
         'display': 'flex',
         'flexDirection': 'column',
-        'padding': '10px'
+        'padding': '10px',
+        'marginLeft': '0px'
     })
 ])
 
@@ -280,6 +280,7 @@ layout = html.Div([
     'justifyContent': 'inline-block',
     'width': '100vw',
     'height': '100vh',
+    'backgroundColor': '#2C2C2C',
 }
 )
 
