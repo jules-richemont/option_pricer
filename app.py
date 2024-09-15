@@ -1,7 +1,9 @@
 import dash
 from dash import html, dcc
+import dash_bootstrap_components as dbc
 
-app = dash.Dash(__name__, use_pages=True)
+
+app = dash.Dash(__name__, use_pages=True, external_stylesheets=[dbc.themes.CYBORG])
 
 # Header with black background and centered links using inline CSS
 header = html.Div([
@@ -11,7 +13,7 @@ header = html.Div([
                 page['name'] + ' | ',
                 href=page['path'],
                 style={
-                    'color': '#fff',  # White text for links
+                    'color': '#fff',
                     'fontSize': '18px',
                     'padding': '0 10px',
                     'textDecoration': 'none',
@@ -20,25 +22,65 @@ header = html.Div([
             for page in dash.page_registry.values()
         ], style={
             'display': 'flex',
-            'justifyContent': 'center',  # Center the navigation links
+            'justifyContent': 'center',
             'alignItems': 'center',
+            'height': '100%',
         }),
     ], style={
         'display': 'flex',
         'flexDirection': 'column',
         'justifyContent': 'center',
         'alignItems': 'center',
-        'padding': '20px 0',
+        'padding': '0',
+        'height': '100%',
     })
 ], style={
-    'backgroundColor': '#000',  # Black background for the header
+    'backgroundColor': '#1a1a1a',
     'boxShadow': '0 4px 6px rgba(0, 0, 0, 0.1)',
     'width': '100%',
     'position': 'fixed',
     'top': '0',
     'left': '0',
-    'height': '7vh'
+    'height': '7vh',
+    'zIndex': '999',
+    'margin': '0',
+    'padding': '0'
 })
+
+# force html structure
+app.index_string = '''
+<!DOCTYPE html>
+
+<html>
+    <head>
+        {%metas%}
+        <title>{%title%}</title>
+        {%favicon%}
+        {%css%}
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+            html, body {
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+        </style>
+    </head>
+    <body>
+        {%app_entry%}
+        <footer>
+            {%config%}
+            {%scripts%}
+            {%renderer%}
+        </footer>
+    </body>
+</html>
+'''
 
 # Page layout
 app.layout = html.Div([
@@ -46,12 +88,18 @@ app.layout = html.Div([
     html.Div(
         dash.page_container,
         style={
-            'marginTop': '7vh',
+            'marginTop': '7vh',  # Creates space exactly matching the header height
+            'padding': '0',  # No padding around the content
+            'flex': '1',  # Allow the content to take the remaining space
         }
     )
-])
+], style={
+    'display': 'flex',
+    'flexDirection': 'column',
+    'margin': 0,
+    'padding': 0,
+    'minHeight': '100vh',  # Full height layout
+})
 
 if __name__ == '__main__':
     app.run(debug=True, port=7777)
-
-# apzegooezahgopqjhgoiua
