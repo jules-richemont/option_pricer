@@ -11,6 +11,17 @@ import plotly.graph_objects as go
 # Registering the page in the app
 dash.register_page(__name__, name='B&S Pricer', path='/b&s_pricer')
 
+
+
+# key_parameters
+bs_key_parameters = [
+    {'label': 'Spot Price', 'value': 'S'},
+    {'label': 'Strike Price', 'value': 'K'},
+    {'label': 'Time To Maturity', 'value': 'T'},
+    {'label': 'Volatility', 'value': 'V'},
+    {'label': 'Risk Free Rate', 'value': 'rf'},
+]
+
 # Layout for B&S Pricer page
 parameters = html.Div([
     html.Div([
@@ -127,6 +138,19 @@ parameters = html.Div([
         }
     ),
 
+    dcc.Dropdown(
+        id='xaxis-bs',
+        options=bs_key_parameters,
+        value=None,
+    ),
+
+    dcc.Dropdown(
+        id='yaxis-bs',
+        options=bs_key_parameters,
+        value=None,
+    ),
+
+
     html.Div([
         html.Label('min Spot Price:'),
         dcc.Input(
@@ -197,7 +221,7 @@ parameters = html.Div([
     })
 ], style={
     'height': '100vh',
-    'width': '15vw',
+    'width': '20vw',
     'backgroundColor': '#2b2b2b',
 })
 
@@ -392,6 +416,7 @@ def compute_option_price_with_bs(spot, strike, maturity, sigma, rf):
 @callback(
     Output('call-heatmap', 'figure'),
     Output('put-heatmap', 'figure'),
+    Output('3d-call-bs', 'figure'),
     [
         Input('min-spot-price-bs', 'value'),
         Input('max-spot-price-bs', 'value'),
@@ -420,7 +445,7 @@ def fill_heatmap(S_min, S_max, vol_min, vol_max, K, T, rf):
     put_df = df.pivot(index='S', columns='vol', values='put_price')
 
     call_heatmap = px.imshow(
-        call_df.round(2),
+        call_df.round(3),
         x=call_df.index.tolist(),
         y=call_df.columns.tolist(),
         labels={'x': 'Spot Price', 'y': 'Volatility', 'color': 'Call Price'},
@@ -439,58 +464,67 @@ def fill_heatmap(S_min, S_max, vol_min, vol_max, K, T, rf):
         text_auto=True,
     )
 
-    return call_heatmap, put_heatmap
-
-@callback(
-    Output('3d-call-bs', 'figure'),
-    Output('3d-put-bs', 'figure'),
-    [
-        Input('min-spot-price-bs', 'value'),
-        Input('max-spot-price-bs', 'value'),
-        Input('min-volatility-bs', 'value'),
-        Input('max-volatility-bs', 'value'),
-        Input('strike-bs', 'value'),
-        Input('maturity-bs', 'value'),
-        Input('rf-rate-bs', 'value'),
-    ]
-)
-def get_3d_graph(s_min, s_max, vol_min, vol_max, K, mat, rf):
-    if not s_min or not s_max or not vol_min or not vol_max or not rf:
-        raise PreventUpdate
-
-    s_range = np.linspace(s_min, s_max, 11)
-    vol_range = np.linspace(vol_min, vol_max, 11)
-    mat_range = np.linspace(0.5, 1.5, 11)
-    df = pd.DataFrame([
-        (S, vol, T)
-        for S in s_range
-        for vol in vol_range
-        for T in mat_range
-    ], columns=['S', 'vol', 'T'])
-
-    df[['call_price', 'put_price']] = df.apply(lambda row: b_s_approximation(row['S'], K, row['T'], row['vol'], rf), axis=1,
-                                               result_type='expand')
-
     call_fig = go.Figure(data=[go.Mesh3d(
-        x=df['S'],
-        y=df['vol'],
-        z=df['T'],
-        intensity = df['call_price'],
+        x=call_df.index.tolist(),
+        y=call_df.columns.tolist(),
+        z=call_df.values,
         colorscale='Viridis',
         opacity=0.5,
         showscale=True,
     )])
 
-
-    put_fig = go.Figure(data=[go.Mesh3d(
-        x=df['S'],
-        y=df['vol'],
-        z=df['T'],
-        intensity=df['put_price'],
-        colorscale='Plasma',
-        opacity=0.5,
-        showscale=True
-    )])
-
-
-    return call_fig, put_fig
+    return call_heatmap, put_heatmap, call_fig
+#
+# @callback(
+#     Output('3d-call-bs', 'figure'),
+#     Output('3d-put-bs', 'figure'),
+#     [
+#         Input('min-spot-price-bs', 'value'),
+#         Input('max-spot-price-bs', 'value'),
+#         Input('min-volatility-bs', 'value'),
+#         Input('max-volatility-bs', 'value'),
+#         Input('strike-bs', 'value'),
+#         Input('maturity-bs', 'value'),
+#         Input('rf-rate-bs', 'value'),
+#     ]
+# )
+# def get_3d_graph(s_min, s_max, vol_min, vol_max, K, mat, rf):
+#     if not s_min or not s_max or not vol_min or not vol_max or not rf:
+#         raise PreventUpdate
+#
+#     s_range = np.linspace(s_min, s_max, 11)
+#     vol_range = np.linspace(vol_min, vol_max, 11)
+#     mat_range = np.linspace(0.5, 1.5, 11)
+#     df = pd.DataFrame([
+#         (S, vol, T)
+#         for S in s_range
+#         for vol in vol_range
+#         for T in mat_range
+#     ], columns=['S', 'vol', 'T'])
+#
+#     df[['call_price', 'put_price']] = df.apply(lambda row: b_s_approximation(row['S'], K, row['T'], row['vol'], rf), axis=1,
+#                                                result_type='expand')
+#
+#     call_fig = go.Figure(data=[go.Mesh3d(
+#         x=df['S'],
+#         y=df['T'],
+#         z=df['call_price'],
+#         intensity = df['vol'],
+#         colorscale='Viridis',
+#         opacity=0.5,
+#         showscale=True,
+#     )])
+#
+#
+#     put_fig = go.Figure(data=[go.Mesh3d(
+#         x=df['S'],
+#         y=df['T'],
+#         z=df['put_price'],
+#         intensity=df['vol'],
+#         colorscale='Plasma',
+#         opacity=0.5,
+#         showscale=True
+#     )])
+#
+#
+#     return call_fig, put_fig
