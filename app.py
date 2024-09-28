@@ -15,8 +15,7 @@ from option_class.merton_pricer import Merton_pricer
 from option_class.vg_pricer import VG_pricer
 from option_class.dupire_pricer import Dupire_pricer
 
-server = Flask(__name__)  # Create Flask server
-app = dash.Dash(__name__, server=server, external_stylesheets=[dbc.themes.CYBORG])
+app = dash.Dash(__name__, external_stylesheets=[dbc.themes.CYBORG])
 server = app.server
 
 # Liste des modèles disponibles
@@ -520,9 +519,5 @@ def update_output(model, param_values, spot_range, vol_range, param_ids):
     )
     return call_price_str, put_price_str, heatmap_call, heatmap_put, surface_call, surface_put
 
-# Get the port from the environment
-port = int(os.environ.get('PORT', 8050))
-
-# Run the app
 if __name__ == '__main__':
-    app.run_server(debug=True, host='0.0.0.0', port=port)
+    app.run_server(debug=True)
