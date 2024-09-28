@@ -11,14 +11,21 @@ class Binomial_pricer:
         self.K = K           # Prix d'exercice
         self.T = T           # Maturité
         self.r = r           # Taux sans risque
+        if sigma <= 0:
+            raise ValueError("Volatility sigma must be positive")
         self.sigma = sigma   # Volatilité
+        if steps <= 0:
+            raise ValueError("Number of steps must be positive")
         self.steps = steps   # Nombre d'étapes dans l'arbre binomial
         self.dt = T / steps  # Taille d'un intervalle de temps
         self.u = np.exp(sigma * np.sqrt(self.dt))  # Facteur de hausse
         self.d = 1 / self.u  # Facteur de baisse
-        self.q = (np.exp(r * self.dt) - self.d) / (self.u - self.d)  # Probabilité de montée
+        denominator = self.u - self.d
+        if denominator == 0:
+            raise ValueError("Invalid parameters leading to division by zero in probability calculation.")
+        self.q = (np.exp(r * self.dt) - self.d) / denominator  # Probabilité de montée
 
-    def price_option(self, option_type="call"):
+    def get_european_option(self):
         stock_price = np.zeros(self.steps + 1)
         call_price = np.zeros(self.steps + 1)
         put_price = np.zeros(self.steps + 1)
