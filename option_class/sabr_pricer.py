@@ -5,6 +5,7 @@ from scipy.stats import norm
 # Utilisé pour modéliser la volatilité implicite des options, en particulier pour les marchés des taux d'intérêt et des matières premières.
 # Il est capable de capturer le "smile" de volatilité et permet de modéliser des dynamiques de volatilité stochastique.
 # Particulièrement utilisé dans les marchés où la volatilité dépend du prix du sous-jacent et évolue dans le temps.
+
 class SABR_pricer:
     def __init__(self, S, K, T, alpha, beta, rho, nu):
         self.S = S          # Prix actuel du sous-jacent
